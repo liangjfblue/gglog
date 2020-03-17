@@ -4,6 +4,10 @@ a useful log, depend on glog
 ## demo
 you can see the demo in test/glog_test.go
 
+## features
+- 1、cutting log files every day
+- 2、free to control refresh buffer time
+
 ## use step
 
 - 1.NewGGLog()
@@ -17,4 +21,3 @@ you can see the demo in test/glog_test.go
     [2020-03-11 17:31:42][testing.go:909][INFO]: info...
     [2020-03-11 17:53:59][testing.go:909][INFO]: info...
     [2020-03-11 18:01:35][testing.go:909][INFO]: info...
-
