@@ -1,4 +1,4 @@
-package glog
+package lib
 
 import (
 	"strconv"
@@ -6,15 +6,15 @@ import (
 	"sync/atomic"
 )
 
-// Severity identifies the sort of log: info, warning etc. It also implements
+// Severity identifies the sort of vlog: info, warning etc. It also implements
 // the flag.Value interface. The -stderrthreshold flag is of type Severity and
 // should be modified only through the flag.Value interface. The values match
 // the corresponding constants in C++.
 type Severity int32 // sync/atomic int32
 
-// These constants identify the log levels in order of increasing severity.
-// A message written to a high-severity log file is also written to each
-// lower-severity log file.
+// These constants identify the vlog levels in order of increasing severity.
+// A message written to a high-severity vlog file is also written to each
+// lower-severity vlog file.
 const (
 	debugLog Severity = iota
 	infoLog
@@ -26,7 +26,7 @@ const (
 	numSeverity = 7
 )
 
-// These constants identify the log levels in order of increasing severity.
+// These constants identify the vlog levels in order of increasing severity.
 const (
 	// AllLog   = debugLog - 1
 	DebugLog                = debugLog

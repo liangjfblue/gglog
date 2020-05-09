@@ -1,4 +1,4 @@
-package glog
+package lib
 
 import (
 	"bufio"
@@ -15,7 +15,7 @@ type buffer struct {
 	next *buffer
 }
 
-// Some custom tiny helper functions to print the log header efficiently.
+// Some custom tiny helper functions to print the vlog header efficiently.
 
 const digits = "0123456789"
 
@@ -65,7 +65,7 @@ type flushSyncWriter interface {
 }
 
 // syncBuffer joins a bufio.Writer to its underlying file, providing access to the
-// file's Sync method and providing a wrapper for the Write method that provides log
+// file's Sync method and providing a wrapper for the Write method that provides vlog
 // file rotation. There are conflicting methods, so the file cannot be embedded.
 // l.mu is held for all its methods.
 type syncBuffer struct {
@@ -106,7 +106,7 @@ func (sb *syncBuffer) RotateFile(now time.Time) error {
 	return err
 }
 
-// bufferSize sizes the buffer associated with each log file. It's large
-// so that log records can accumulate without the logging thread blocking
+// bufferSize sizes the buffer associated with each vlog file. It's large
+// so that vlog records can accumulate without the logging thread blocking
 // on disk I/O. The flushDaemon will block instead.
 const bufferSize = 256 * 1024
