@@ -12,6 +12,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/liangjfblue/gglog/vlog/kafka"
+
 	"github.com/liangjfblue/gglog/vlog"
 
 	"github.com/liangjfblue/gglog/vlog/glog"
@@ -73,4 +75,26 @@ func TestGGlogOther(t *testing.T) {
 
 	//flush log right now
 	l.FlushLog()
+}
+
+func TestKafkaLog(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.TODO())
+	defer cancel()
+
+	l := NewGGLog(
+		Log(kafka.NewKafkaLog(
+			vlog.BrokerAddrs([]string{"127.0.0.1:9092", "127.0.0.1:9093", "127.0.0.1:9094"}),
+			vlog.Topic("kafka-vlog"),
+			vlog.Key("kafka-key-test"),
+			vlog.IsSync(false),
+		)),
+		Context(ctx),
+	)
+	l.Init()
+
+	l.Debug("Debug...")
+	l.Info("Info...")
+	l.Warn("Warn...")
+	l.Error("Error...")
+	l.Access("Access...")
 }

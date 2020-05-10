@@ -1,9 +1,5 @@
 package gglog
 
-import (
-	"sync"
-)
-
 type GGLog interface {
 	Name() string
 	Init()
@@ -20,8 +16,6 @@ type Option func(*Options)
 
 type gglog struct {
 	opts Options
-
-	once sync.Once
 }
 
 func NewGGLog(opts ...Option) GGLog {

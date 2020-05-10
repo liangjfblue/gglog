@@ -39,7 +39,7 @@ func Name(name string) Option {
 	}
 }
 
-func Log(log gglog.Log) Option {
+func Log(log vlog.Log) Option {
 	return func(o *Options) {
 		o.Log = log
 	}

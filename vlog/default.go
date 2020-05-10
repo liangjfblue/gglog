@@ -15,5 +15,11 @@ var (
 		EnableLogHeader: true,
 		EnableLogLink:   false,
 		FlushInterval:   time.Duration(2) * time.Second,
+
+		//kafka
+		BrokerAddrs: []string{"127.0.0.1:9092"},
+		Topic:       "gglog-topic",
+		Key:         "gglog-key",
+		IsSync:      true,
 	}
 )

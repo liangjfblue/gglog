@@ -17,8 +17,10 @@ type LogOptions struct {
 	FlushInterval   time.Duration
 
 	//kafka
-	Addr    []string
-	TimeOut time.Duration
+	BrokerAddrs []string
+	Topic       string
+	Key         string
+	IsSync      bool
 
 	//aliyun
 	AccessId     string
@@ -80,5 +82,29 @@ func EnableLogLink(enableLogLink bool) LogOption {
 func FlushInterval(flushInterval time.Duration) LogOption {
 	return func(o *LogOptions) {
 		o.FlushInterval = flushInterval
+	}
+}
+
+func BrokerAddrs(brokerAddrs []string) LogOption {
+	return func(o *LogOptions) {
+		o.BrokerAddrs = brokerAddrs
+	}
+}
+
+func Topic(topic string) LogOption {
+	return func(o *LogOptions) {
+		o.Topic = topic
+	}
+}
+
+func Key(key string) LogOption {
+	return func(o *LogOptions) {
+		o.Key = key
+	}
+}
+
+func IsSync(isSync bool) LogOption {
+	return func(o *LogOptions) {
+		o.IsSync = isSync
 	}
 }
