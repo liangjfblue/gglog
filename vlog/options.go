@@ -18,6 +18,7 @@ type LogOptions struct {
 
 	//kafka
 	BrokerAddrs []string
+	Partition   int
 	Topic       string
 	Key         string
 	IsSync      bool
@@ -94,6 +95,12 @@ func BrokerAddrs(brokerAddrs []string) LogOption {
 func Topic(topic string) LogOption {
 	return func(o *LogOptions) {
 		o.Topic = topic
+	}
+}
+
+func Partition(partition int) LogOption {
+	return func(o *LogOptions) {
+		o.Partition = partition
 	}
 }
 

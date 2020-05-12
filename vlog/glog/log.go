@@ -3,6 +3,7 @@ package glog
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"sync"
@@ -96,6 +97,14 @@ func (s *glog) InterfaceAvgDuration(format string, args ...interface{}) {
 
 func (s *glog) FlushLog() {
 	s.GLog.Flush()
+}
+
+func (s *glog) Run() {
+	log.Println("nothing to do")
+}
+
+func (s *glog) Stop() {
+	log.Println("nothing to do")
 }
 
 func (s *glog) initGLog() {

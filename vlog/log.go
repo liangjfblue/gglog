@@ -9,6 +9,8 @@ package vlog
 type Log interface {
 	Name() string
 	Init(...LogOption)
+	Run()
+	Stop()
 	Debug(format string, args ...interface{})
 	Info(format string, args ...interface{})
 	Warn(format string, args ...interface{})

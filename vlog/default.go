@@ -19,6 +19,7 @@ var (
 		//kafka
 		BrokerAddrs: []string{"127.0.0.1:9092"},
 		Topic:       "gglog-topic",
+		Partition:   1,
 		Key:         "gglog-key",
 		IsSync:      true,
 	}

@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/liangjfblue/gglog/vlog/kafka"
 
@@ -78,23 +79,27 @@ func TestGGlogOther(t *testing.T) {
 }
 
 func TestKafkaLog(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer cancel()
-
 	l := NewGGLog(
 		Log(kafka.NewKafkaLog(
-			vlog.BrokerAddrs([]string{"127.0.0.1:9092", "127.0.0.1:9093", "127.0.0.1:9094"}),
+			vlog.BrokerAddrs([]string{"172.16.7.16:9092", "172.16.7.16:9093", "172.16.7.16:9094"}),
 			vlog.Topic("kafka-vlog"),
 			vlog.Key("kafka-key-test"),
-			vlog.IsSync(false),
+			vlog.IsSync(true),
 		)),
-		Context(ctx),
 	)
 	l.Init()
+	defer l.Stop()
+	go l.Run()
 
-	l.Debug("Debug...")
-	l.Info("Info...")
-	l.Warn("Warn...")
-	l.Error("Error...")
-	l.Access("Access...")
+	start := time.Now()
+	for i := 0; i < 10; i++ {
+		l.Debug("D...")
+		l.Info("I...")
+		l.Warn("W...")
+		l.Error("E...")
+		l.Access("A...")
+	}
+	t.Log(time.Now().Sub(start))
+
+	time.Sleep(10 * time.Second)
 }

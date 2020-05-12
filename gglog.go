@@ -3,6 +3,8 @@ package gglog
 type GGLog interface {
 	Name() string
 	Init()
+	Run()
+	Stop()
 	Debug(format string, args ...interface{})
 	Info(format string, args ...interface{})
 	Warn(format string, args ...interface{})
@@ -102,4 +104,12 @@ func (l *gglog) FlushLog() {
 	for _, fn := range l.opts.After {
 		fn()
 	}
+}
+
+func (l *gglog) Run() {
+	l.opts.Log.Run()
+}
+
+func (l *gglog) Stop() {
+	l.opts.Log.Stop()
 }
