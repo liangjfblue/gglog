@@ -16,7 +16,7 @@
 
 // File I/O for logs.
 
-package glog
+package lib
 
 import (
 	"fmt"
@@ -68,14 +68,14 @@ func shortHostname(hostname string) string {
 	return hostname
 }
 
-// logName returns a new log file name containing tag, with start time t, and
+// logName returns a new vlog file name containing tag, with start time t, and
 // the name for the symlink for tag.
 func (l *LoggingT) logName(tag string, t time.Time) (name, link string) {
 
 	if l.fileNameFormatFunc != nil {
 		name = l.fileNameFormatFunc(tag, t)
 	} else {
-		name = fmt.Sprintf("%s.%s.%s.log.%s.%04d%02d%02d",
+		name = fmt.Sprintf("%s.%s.%s.vlog.%s.%04d%02d%02d",
 			program,
 			host,
 			userName,
@@ -88,7 +88,7 @@ func (l *LoggingT) logName(tag string, t time.Time) (name, link string) {
 	return name, program + "." + tag
 }
 
-// create creates a new log file and returns the file and its filename, which
+// create creates a new vlog file and returns the file and its filename, which
 // contains tag ("INFO", "FATAL", etc.) and t.  If the file is created
 // successfully, create also attempts to update the symlink for that tag, ignoring
 // errors.
@@ -109,6 +109,6 @@ func (l *LoggingT) create(tag string, t time.Time) (f *os.File, filename string,
 		return f, fname, nil
 	}
 
-	return nil, "", fmt.Errorf("log: cannot create log: %v", err)
+	return nil, "", fmt.Errorf("vlog: cannot create vlog: %v", err)
 
 }

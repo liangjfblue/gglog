@@ -1,4 +1,4 @@
-package glog
+package lib
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ func Test_KeyLogger(t *testing.T) {
 
 	logger := NewKeyLogger("./test_log", time.Second*3, time.Second*10)
 
-	logger.KPrintf("test_key_a", "test key log a\n")
+	logger.KPrintf("test_key_a", "test key vlog a\n")
 
 	logger.Flush()
 
@@ -25,7 +25,7 @@ func Benchmark_KeyLog(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 
 		for pb.Next() {
-			logger.KPrintf(fmt.Sprintf("test_key_%d", rand.Intn(10)), "test key log a\n")
+			logger.KPrintf(fmt.Sprintf("test_key_%d", rand.Intn(10)), "test key vlog a\n")
 		}
 	})
 
