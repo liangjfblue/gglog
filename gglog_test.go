@@ -128,6 +128,32 @@ func TestKafkaLogAsync(t *testing.T) {
 	time.Sleep(5 * time.Second)
 }
 
+func TestKafkaLogAsyncCallBack(t *testing.T) {
+	l := NewGGLog(
+		Log(kafka.NewKafkaLog(
+			vlog.BrokerAddrs([]string{"172.16.7.16:9092", "172.16.7.16:9093", "172.16.7.16:9094"}),
+			vlog.Topic("kafka-vlog"),
+			vlog.Key("kafka-key-test"),
+			vlog.IsSync(false),
+			vlog.CallBack(new(kafka.DefaultKafkaCallback)),
+		)),
+	)
+	l.Init()
+	defer l.Stop() //you can stop when you want to stop kafka log
+	go l.Run()
+
+	for i := 0; i < 100; i++ {
+		l.Debug("D...")
+		l.Info("I...")
+		l.Warn("W...")
+		l.Error("E...")
+		l.Access("A...")
+		time.Sleep(time.Second) //close the kafka, when test running, so you can see err in callback Fail(error)
+	}
+
+	time.Sleep(5 * time.Second)
+}
+
 func TestKafkaLogAsyncRace(t *testing.T) {
 	l := NewGGLog(
 		Log(kafka.NewKafkaLog(

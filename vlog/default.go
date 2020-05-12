@@ -22,6 +22,7 @@ var (
 		Partition:   1,
 		Key:         "gglog-key",
 		IsSync:      true,
+		CallBack:    nil,
 
 		//aliyun
 		Endpoint:     "127.0.0.1",

@@ -193,6 +193,13 @@ func (s *kafkaLog) sendLogToKafkaSync() {
 			if err != nil {
 				log.Printf("send msg to kafka fail, because is %s, parttion, offset: %d %d",
 					err.Error(), partition, offset)
+				if s.opts.CallBack != nil {
+					s.opts.CallBack.Fail(err)
+				}
+			} else {
+				if s.opts.CallBack != nil {
+					s.opts.CallBack.Success("send log ok")
+				}
 			}
 		case <-s.stopChan:
 			s.Lock()
@@ -238,10 +245,16 @@ func (s *kafkaLog) sendLogToKafkaAsync() {
 
 			select {
 			case <-s._asyncProducer.Successes():
+				if s.opts.CallBack != nil {
+					s.opts.CallBack.Success("send log ok")
+				}
 				continue
 			case err := <-s._asyncProducer.Errors():
 				//TODO retry to send log to kafka
 				log.Println("produced message error: ", err)
+				if s.opts.CallBack != nil {
+					s.opts.CallBack.Fail(err)
+				}
 			default:
 			}
 		case <-s.stopChan:

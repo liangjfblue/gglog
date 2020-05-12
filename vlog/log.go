@@ -21,3 +21,8 @@ type Log interface {
 }
 
 type LogOption func(*LogOptions)
+
+type ICallBack interface {
+	Success(string)
+	Fail(error)
+}

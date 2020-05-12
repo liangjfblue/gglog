@@ -22,6 +22,7 @@ type LogOptions struct {
 	Topic       string
 	Key         string
 	IsSync      bool
+	CallBack    ICallBack
 
 	//aliyun
 	Endpoint     string
@@ -118,6 +119,11 @@ func Key(key string) LogOption {
 func IsSync(isSync bool) LogOption {
 	return func(o *LogOptions) {
 		o.IsSync = isSync
+	}
+}
+func CallBack(callBack ICallBack) LogOption {
+	return func(o *LogOptions) {
+		o.CallBack = callBack
 	}
 }
 
