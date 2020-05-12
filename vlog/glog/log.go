@@ -10,6 +10,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/liangjfblue/gglog/utils"
+
 	"github.com/liangjfblue/gglog/vlog"
 
 	"github.com/liangjfblue/gglog/vlog/glog/lib"
@@ -52,33 +54,26 @@ func (s *glog) String() string {
 	return "vlog"
 }
 
-const (
-	levelD = iota + 1
-	levelI
-	levelW
-	levelE
-)
-
 func (s *glog) Debug(format string, args ...interface{}) {
-	if s.opts.Level <= levelD {
+	if s.opts.Level <= utils.LevelD {
 		s.GLog.DebugDepth(1, fmt.Sprintf(format, args...))
 	}
 }
 
 func (s *glog) Info(format string, args ...interface{}) {
-	if s.opts.Level <= levelI {
+	if s.opts.Level <= utils.LevelI {
 		s.GLog.InfoDepth(1, fmt.Sprintf(format, args...))
 	}
 }
 
 func (s *glog) Warn(format string, args ...interface{}) {
-	if s.opts.Level <= levelW {
+	if s.opts.Level <= utils.LevelW {
 		s.GLog.WarningDepth(1, fmt.Sprintf(format, args...))
 	}
 }
 
 func (s *glog) Error(format string, args ...interface{}) {
-	if s.opts.Level <= levelE {
+	if s.opts.Level <= utils.LevelE {
 		s.GLog.ErrorDepth(1, fmt.Sprintf(format, args...))
 	}
 }

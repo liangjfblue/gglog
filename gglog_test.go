@@ -13,6 +13,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/liangjfblue/gglog/vlog/aliyun"
+
 	"github.com/liangjfblue/gglog/vlog/kafka"
 
 	"github.com/liangjfblue/gglog/vlog"
@@ -150,4 +152,29 @@ func TestKafkaLogAsyncRace(t *testing.T) {
 	}
 
 	time.Sleep(time.Second * 5)
+}
+
+func TestAliyunLog(t *testing.T) {
+	l := NewGGLog(
+		Log(aliyun.NewAliyunLog(
+			vlog.Endpoint("cn-shenzhen.log.aliyuncs.com"),
+			vlog.Project("gglog"),
+			vlog.LogStore("test-gglog"),
+			vlog.AccessId("xxx"),     //use your AccessId
+			vlog.AccessSecret("xxx"), //use your AccessSecret
+			vlog.AliyunTopic("gglog-aliyun"),
+			vlog.AliyunSource("gglog-aliyun-test"),
+		)),
+	)
+	l.Init()
+	l.Run()
+	defer l.Stop()
+
+	for i := 0; i < 2; i++ {
+		l.Debug("this is a test for debug")
+		l.Info("i am a man")
+		l.Warn("something is warning")
+		l.Error("now have a wrong")
+		l.Access("url:/v1/user/login method:POST")
+	}
 }

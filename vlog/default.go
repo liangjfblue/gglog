@@ -22,5 +22,14 @@ var (
 		Partition:   1,
 		Key:         "gglog-key",
 		IsSync:      true,
+
+		//aliyun
+		Endpoint:     "127.0.0.1",
+		Project:      "aliyun-log",
+		LogStore:     "gglog-aliyun-log",
+		AccessId:     "",
+		AccessSecret: "",
+		AliyunTopic:  "127.0.0.1",
+		AliyunSource: "topic",
 	}
 )
