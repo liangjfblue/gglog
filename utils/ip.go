@@ -4,15 +4,15 @@
  * @create on 2020/5/11
  * @version 1.0
  */
-package kafka
+package utils
 
 import (
 	"errors"
 	"net"
 )
 
-// externalIP 获取公网IP , 假设本机有独立公网IP
-func externalIP() (string, error) {
+// ExternalIP 获取公网IP , 假设本机有独立公网IP
+func ExternalIP() (string, error) {
 
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {

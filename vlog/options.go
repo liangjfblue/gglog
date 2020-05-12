@@ -24,8 +24,13 @@ type LogOptions struct {
 	IsSync      bool
 
 	//aliyun
+	Endpoint     string
+	Project      string
+	LogStore     string
 	AccessId     string
 	AccessSecret string
+	AliyunTopic  string
+	AliyunSource string
 }
 
 func NewOptions(opts ...LogOption) LogOptions {
@@ -113,5 +118,47 @@ func Key(key string) LogOption {
 func IsSync(isSync bool) LogOption {
 	return func(o *LogOptions) {
 		o.IsSync = isSync
+	}
+}
+
+func Endpoint(endpoint string) LogOption {
+	return func(o *LogOptions) {
+		o.Endpoint = endpoint
+	}
+}
+
+func Project(project string) LogOption {
+	return func(o *LogOptions) {
+		o.Project = project
+	}
+}
+
+func LogStore(logStore string) LogOption {
+	return func(o *LogOptions) {
+		o.LogStore = logStore
+	}
+}
+
+func AccessId(accessId string) LogOption {
+	return func(o *LogOptions) {
+		o.AccessId = accessId
+	}
+}
+
+func AccessSecret(accessSecret string) LogOption {
+	return func(o *LogOptions) {
+		o.AccessSecret = accessSecret
+	}
+}
+
+func AliyunTopic(aliyunTopic string) LogOption {
+	return func(o *LogOptions) {
+		o.AliyunTopic = aliyunTopic
+	}
+}
+
+func AliyunSource(aliyunSource string) LogOption {
+	return func(o *LogOptions) {
+		o.AliyunSource = aliyunSource
 	}
 }

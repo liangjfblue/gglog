@@ -15,18 +15,18 @@ import (
 
 	"github.com/Shopify/sarama"
 
+	"github.com/liangjfblue/gglog/utils"
 	"github.com/liangjfblue/gglog/vlog"
 )
 
 type kafkaLog struct {
-	opts               vlog.LogOptions
-	channel            chan string
-	_syncProducer      sarama.SyncProducer
-	_asyncProducer     sarama.AsyncProducer
-	stopChan           chan struct{}
-	isStop             bool
-	kafkaLogSendFailed bool
-	once               sync.Once
+	opts           vlog.LogOptions
+	channel        chan string
+	_syncProducer  sarama.SyncProducer
+	_asyncProducer sarama.AsyncProducer
+	stopChan       chan struct{}
+	isStop         bool
+	once           sync.Once
 	sync.RWMutex
 }
 
@@ -36,7 +36,7 @@ var (
 )
 
 func init() {
-	_serverIp, _ = externalIP()
+	_serverIp, _ = utils.ExternalIP()
 	_hostName, _ = os.Hostname()
 }
 
@@ -44,11 +44,10 @@ func NewKafkaLog(opts ...vlog.LogOption) vlog.Log {
 	options := vlog.NewOptions(opts...)
 
 	return &kafkaLog{
-		opts:               options,
-		channel:            make(chan string, 10),
-		stopChan:           make(chan struct{}, 1),
-		isStop:             false,
-		kafkaLogSendFailed: false,
+		opts:     options,
+		channel:  make(chan string, 1000),
+		stopChan: make(chan struct{}, 1),
+		isStop:   false,
 	}
 }
 
@@ -74,55 +73,39 @@ func (s *kafkaLog) String() string {
 	return "kafkaLog"
 }
 
-const (
-	levelD = iota + 1
-	levelI
-	levelW
-	levelE
-)
-
-const (
-	Debug  = "debug"
-	Info   = "info"
-	Warn   = "warn"
-	Error  = "error"
-	Access = "access"
-	IAVGD  = "iavgd"
-)
-
 func (s *kafkaLog) Debug(format string, args ...interface{}) {
-	if s.opts.Level <= levelD {
-		s.toChannel(Debug, fmt.Sprintf(format, args...))
+	if s.opts.Level <= utils.LevelD {
+		s.toChannel(utils.Debug, fmt.Sprintf(format, args...))
 	}
 }
 
 func (s *kafkaLog) Info(format string, args ...interface{}) {
-	if s.opts.Level <= levelI {
-		s.toChannel(Info, fmt.Sprintf(format, args...))
+	if s.opts.Level <= utils.LevelI {
+		s.toChannel(utils.Info, fmt.Sprintf(format, args...))
 	}
 }
 
 func (s *kafkaLog) Warn(format string, args ...interface{}) {
-	if s.opts.Level <= levelW {
-		s.toChannel(Warn, fmt.Sprintf(format, args...))
+	if s.opts.Level <= utils.LevelW {
+		s.toChannel(utils.Warn, fmt.Sprintf(format, args...))
 	}
 }
 
 func (s *kafkaLog) Error(format string, args ...interface{}) {
-	if s.opts.Level <= levelE {
-		s.toChannel(Error, fmt.Sprintf(format, args...))
+	if s.opts.Level <= utils.LevelE {
+		s.toChannel(utils.Error, fmt.Sprintf(format, args...))
 	}
 }
 
 func (s *kafkaLog) Access(format string, args ...interface{}) {
 	if s.opts.OpenAccessLog == true {
-		s.toChannel(Access, fmt.Sprintf(format, args...))
+		s.toChannel(utils.Access, fmt.Sprintf(format, args...))
 	}
 }
 
 func (s *kafkaLog) InterfaceAvgDuration(format string, args ...interface{}) {
 	if s.opts.OpenInterfaceAvgDurationLog == true {
-		s.toChannel(IAVGD, fmt.Sprintf(format, args...))
+		s.toChannel(utils.IAVGD, fmt.Sprintf(format, args...))
 	}
 }
 
