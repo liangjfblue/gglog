@@ -78,7 +78,7 @@ func TestGGlogOther(t *testing.T) {
 	l.FlushLog()
 }
 
-func TestKafkaLog(t *testing.T) {
+func TestKafkaLogSync(t *testing.T) {
 	l := NewGGLog(
 		Log(kafka.NewKafkaLog(
 			vlog.BrokerAddrs([]string{"172.16.7.16:9092", "172.16.7.16:9093", "172.16.7.16:9094"}),
@@ -92,7 +92,7 @@ func TestKafkaLog(t *testing.T) {
 	go l.Run()
 
 	start := time.Now()
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 200; i++ {
 		l.Debug("D...")
 		l.Info("I...")
 		l.Warn("W...")
@@ -100,6 +100,54 @@ func TestKafkaLog(t *testing.T) {
 		l.Access("A...")
 	}
 	t.Log(time.Now().Sub(start))
+}
 
-	time.Sleep(10 * time.Second)
+func TestKafkaLogAsync(t *testing.T) {
+	l := NewGGLog(
+		Log(kafka.NewKafkaLog(
+			vlog.BrokerAddrs([]string{"172.16.7.16:9092", "172.16.7.16:9093", "172.16.7.16:9094"}),
+			vlog.Topic("kafka-vlog"),
+			vlog.Key("kafka-key-test"),
+			vlog.IsSync(false),
+		)),
+	)
+	l.Init()
+	defer l.Stop() //you can stop when you want to stop kafka log
+	go l.Run()
+
+	for i := 0; i < 100; i++ {
+		l.Debug("D...")
+		l.Info("I...")
+		l.Warn("W...")
+		l.Error("E...")
+		l.Access("A...")
+	}
+
+	time.Sleep(5 * time.Second)
+}
+
+func TestKafkaLogAsyncRace(t *testing.T) {
+	l := NewGGLog(
+		Log(kafka.NewKafkaLog(
+			vlog.BrokerAddrs([]string{"172.16.7.16:9092", "172.16.7.16:9093", "172.16.7.16:9094"}),
+			vlog.Topic("kafka-vlog"),
+			vlog.Key("kafka-key-test"),
+			vlog.IsSync(false),
+		)),
+	)
+	l.Init()
+	defer l.Stop() //you can stop when you want to stop kafka log
+	go l.Run()
+
+	for i := 0; i < 100; i++ {
+		t.Run(fmt.Sprint(i), func(t *testing.T) {
+			l.Debug("D...")
+			l.Info("I...")
+			l.Warn("W...")
+			l.Error("E...")
+			l.Access("A...")
+		})
+	}
+
+	time.Sleep(time.Second * 5)
 }

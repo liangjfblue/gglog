@@ -19,13 +19,15 @@ import (
 )
 
 type kafkaLog struct {
-	opts           vlog.LogOptions
-	channel        chan string
-	_syncProducer  sarama.SyncProducer
-	_asyncProducer sarama.AsyncProducer
-	stopChan       chan struct{}
-	isStop         bool
-	once           sync.Once
+	opts               vlog.LogOptions
+	channel            chan string
+	_syncProducer      sarama.SyncProducer
+	_asyncProducer     sarama.AsyncProducer
+	stopChan           chan struct{}
+	isStop             bool
+	kafkaLogSendFailed bool
+	once               sync.Once
+	sync.RWMutex
 }
 
 var (
@@ -42,10 +44,11 @@ func NewKafkaLog(opts ...vlog.LogOption) vlog.Log {
 	options := vlog.NewOptions(opts...)
 
 	return &kafkaLog{
-		opts:     options,
-		channel:  make(chan string, 10),
-		stopChan: make(chan struct{}, 1),
-		isStop:   false,
+		opts:               options,
+		channel:            make(chan string, 10),
+		stopChan:           make(chan struct{}, 1),
+		isStop:             false,
+		kafkaLogSendFailed: false,
 	}
 }
 
@@ -136,11 +139,17 @@ func (s *kafkaLog) Run() {
 }
 
 func (s *kafkaLog) Stop() {
+	s.RLock()
 	if s.isStop {
+		s.RUnlock()
 		log.Println("had stop")
 		return
 	}
+	s.RUnlock()
+
+	s.Lock()
 	s.stopChan <- struct{}{}
+	s.Unlock()
 }
 
 func (s *kafkaLog) initKafkaLog() {
@@ -175,6 +184,13 @@ func (s *kafkaLog) sendLogToKafkaSync() {
 		}
 	}()
 
+	s.RLock()
+	if s.isStop {
+		s.RUnlock()
+		return
+	}
+	s.RUnlock()
+
 	for {
 		select {
 		case content, ok := <-s.channel:
@@ -190,27 +206,43 @@ func (s *kafkaLog) sendLogToKafkaSync() {
 				Key:   sarama.StringEncoder(key),
 			}
 
-			log.Println(msg)
 			partition, offset, err := s._syncProducer.SendMessage(&msg)
 			if err != nil {
-				log.Printf("send msg to kafka fail, because is %s", err.Error())
+				log.Printf("send msg to kafka fail, because is %s, parttion, offset: %d %d",
+					err.Error(), partition, offset)
 			}
-
-			logMsg := fmt.Sprintf("parttion, offset: %d %d", partition, offset)
-			log.Print(logMsg)
+		case <-s.stopChan:
+			s.Lock()
+			s.isStop = true
+			s.Unlock()
 		}
 	}
 }
 
 func (s *kafkaLog) sendLogToKafkaAsync() {
 	defer func() {
+		close(s.channel)
+		close(s.stopChan)
+
 		if err := s._asyncProducer.Close(); err != nil {
 			log.Printf("close producer fail, because is %s\n", err.Error())
 		}
 	}()
 
+	s.RLock()
+	if s.isStop {
+		s.RUnlock()
+		return
+	}
+	s.RUnlock()
+
 	for {
-		if content, ok := <-s.channel; ok {
+		select {
+		case content, ok := <-s.channel:
+			if !ok {
+				log.Println("chan is closed")
+				return
+			}
 			key := s.opts.Key + "_" + time.Now().Format("2006-01-02 15:04:05")
 
 			msg := sarama.ProducerMessage{
@@ -223,14 +255,16 @@ func (s *kafkaLog) sendLogToKafkaAsync() {
 
 			select {
 			case <-s._asyncProducer.Successes():
+				continue
 			case err := <-s._asyncProducer.Errors():
 				//TODO retry to send log to kafka
 				log.Println("produced message error: ", err)
 			default:
-				log.Println("produced message close / asyncClose")
 			}
-		} else {
-			log.Print("read data form chan error")
+		case <-s.stopChan:
+			s.Lock()
+			s.isStop = true
+			s.Unlock()
 		}
 	}
 }
@@ -246,11 +280,11 @@ func (s *kafkaLog) toChannel(level string, desc string) {
 	str := fmt.Sprintf("{\"ip\":\"%s\", \"location\":\"%s:%d\", \"tm\":%d, \"level\":\"%s\", \"desc\":\"%s\", \"hostname\":\"%s\"}",
 		_serverIp, file, line, now, level, desc, _hostName)
 
+	s.RLock()
 	if !s.isStop {
 		select {
 		case s.channel <- str:
-		case <-s.stopChan:
-			s.isStop = true
 		}
 	}
+	s.RUnlock()
 }

@@ -1,32 +1,31 @@
 # gglog
 
-English | [简体中文](README_ZH.MD)
+[English](README.md) | 简体中文
 
-A lightweight log library, including local logs, kafka logs, Alibaba Cloud logs... 
-Of course, plug-in access to the log library you want
+轻量级的日志库，包括本地日志，kafka日志，阿里云日志... 当然，可以通过插件访问所需的日志库
 
-## demo
-you can see the demo in gglog_test.go
+## 例子
+你可以在看demo gglog_test.go
 
-## feature
-- Pluggable
-- Concurrent security
-- lightweight
+## 特性
+- 可插拔
+- 并发安全
+- 轻量级
 
-## use step
+## 使用步骤
 ### local log
 - 1.NewGGLog()
 - 2.Init()
-- 3.FlushLog()    //or you can set the config param FlushInterval to control flush the log to file
+- 3.FlushLog()    //或者您可以设置配置参数FlushInterval来控制将日志刷新到文件
 
 ### kafka log
 - 1.NewGGLog()
 - 2.Init()
 - 3.Run()
 
-You can also use your own log library by implementing the Log interface
+您还可以通过实现Log接口来使用自己的日志库
 
-## log format
+## 日志格式
 ### log local
 > [date time][code line][level]:msg
 
