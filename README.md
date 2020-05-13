@@ -1,8 +1,10 @@
 # gglog
 
+[![Build Status](https://travis-ci.org/liangjfblue/gglog.svg?branch=master)](https://travis-ci.org/github/liangjfblue/gglog)
+
 English | [简体中文](README_ZH.MD)
 
-A lightweight log library, including local logs, kafka logs, Alibaba Cloud logs... 
+😎A lightweight log library, including local logs, kafka logs, Alibaba Cloud logs... 
 Of course, plug-in access to the log library you want
 
 ## demo
