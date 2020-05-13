@@ -24,6 +24,11 @@ you can see the demo in gglog_test.go
 - 2.Init()
 - 3.Run()
 
+### aliyun log
+- 1.NewGGLog()
+- 2.Init()
+- 3.Run()
+
 You can also use your own log library by implementing the Log interface
 
 ## log format
@@ -42,3 +47,9 @@ You can also use your own log library by implementing the Log interface
     {"ip":"127.0.0.1", "location":"gglog.go:63", "tm":1589254203824, "level":"warn", "desc":"W...", "hostname":"DESKTOP-7LEL6NV"}
     {"ip":"127.0.0.1", "location":"gglog.go:73", "tm":1589254203824, "level":"error", "desc":"E...", "hostname":"DESKTOP-7LEL6NV"}
 
+### aliyun log
+> [ip][code line][date time][level][desc][hostname]
+
+    {"ip":"127.0.0.1", "location":"gglog.go:53", "tm":1589254203824, "level":"info", "desc":"I...", "hostname":"DESKTOP-7LEL6NV"}
+    {"ip":"127.0.0.1", "location":"gglog.go:63", "tm":1589254203824, "level":"warn", "desc":"W...", "hostname":"DESKTOP-7LEL6NV"}
+    {"ip":"127.0.0.1", "location":"gglog.go:73", "tm":1589254203824, "level":"error", "desc":"E...", "hostname":"DESKTOP-7LEL6NV"}

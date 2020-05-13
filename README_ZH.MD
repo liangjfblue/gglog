@@ -23,6 +23,11 @@
 - 2.Init()
 - 3.Run()
 
+### aliyun log
+- 1.NewGGLog()
+- 2.Init()
+- 3.Run()
+
 您还可以通过实现Log接口来使用自己的日志库
 
 ## 日志格式
