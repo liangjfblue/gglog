@@ -1,17 +1,13 @@
+/**
+ *
+ * @author liangjf
+ * @create on 2020/5/9
+ * @version 1.0
+ */
 package gglog
 
-import "time"
+import "github.com/liangjfblue/gglog/vlog/glog"
 
 var (
-	defaultOption = Options{
-		Name:                        "gglog",
-		LogDir:                      "./logs",
-		Level:                       1,
-		OpenAccessLog:               true,
-		OpenInterfaceAvgDurationLog: false,
-
-		EnableLogHeader: true,
-		EnableLogLink:   false,
-		FlushInterval:   time.Duration(2) * time.Second,
-	}
+	DefaultLog = glog.New()
 )

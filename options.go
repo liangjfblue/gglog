@@ -1,23 +1,30 @@
+/**
+ *
+ * @author liangjf
+ * @create on 2020/5/9
+ * @version 1.0
+ */
 package gglog
 
 import (
-	"time"
+	"context"
+
+	"github.com/liangjfblue/gglog/vlog"
 )
 
 type Options struct {
-	Name                        string
-	LogDir                      string
-	Level                       int32
-	OpenAccessLog               bool
-	OpenInterfaceAvgDurationLog bool
-
-	EnableLogHeader bool
-	EnableLogLink   bool
-	FlushInterval   time.Duration
+	Name    string
+	Log     vlog.Log
+	Before  []func()
+	After   []func()
+	Context context.Context
 }
 
 func newOptions(opts ...Option) Options {
-	opt := defaultOption
+	opt := Options{
+		Log:     DefaultLog,
+		Context: context.Background(),
+	}
 
 	for _, o := range opts {
 		o(&opt)
@@ -32,44 +39,26 @@ func Name(name string) Option {
 	}
 }
 
-func LogDir(logDir string) Option {
+func Log(log vlog.Log) Option {
 	return func(o *Options) {
-		o.LogDir = logDir
+		o.Log = log
 	}
 }
 
-func Level(level int32) Option {
+func Context(ctx context.Context) Option {
 	return func(o *Options) {
-		o.Level = level
+		o.Context = ctx
 	}
 }
 
-func OpenAccessLog(openAccessLog bool) Option {
+func Before(fn func()) Option {
 	return func(o *Options) {
-		o.OpenAccessLog = openAccessLog
+		o.Before = append(o.Before, fn)
 	}
 }
 
-func OpenInterfaceAvgDurationLog(openInterfaceAvgDurationLog bool) Option {
+func After(fn func()) Option {
 	return func(o *Options) {
-		o.OpenInterfaceAvgDurationLog = openInterfaceAvgDurationLog
-	}
-}
-
-func EnableLogHeader(enableLogHeader bool) Option {
-	return func(o *Options) {
-		o.EnableLogHeader = enableLogHeader
-	}
-}
-
-func EnableLogLink(enableLogLink bool) Option {
-	return func(o *Options) {
-		o.EnableLogLink = enableLogLink
-	}
-}
-
-func FlushInterval(flushInterval time.Duration) Option {
-	return func(o *Options) {
-		o.FlushInterval = flushInterval
+		o.After = append(o.After, fn)
 	}
 }

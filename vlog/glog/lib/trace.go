@@ -1,4 +1,4 @@
-package glog
+package lib
 
 import (
 	"errors"

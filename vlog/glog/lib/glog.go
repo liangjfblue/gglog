@@ -14,21 +14,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package glog implements logging analogous to the Google-internal C++ INFO/ERROR/V setup.
+// Package lib implements logging analogous to the Google-internal C++ INFO/ERROR/V setup.
 // It provides functions Info, Warning, Error, Fatal, plus formatting variants such as
 // Infof.
 //
 // Basic examples:
 //
-//	glog.Info("Prepare to repel boarders")
+//	lib.Info("Prepare to repel boarders")
 //
-//	glog.Fatalf("Initialization failed: %s", err)
+//	lib.Fatalf("Initialization failed: %s", err)
 //
 //
 // Log output is buffered and written periodically using Flush. Programs
-// should call Flush before exiting to guarantee all log output is written.
+// should call Flush before exiting to guarantee all vlog output is written.
 //
-// By default, all log statements write to files in a temporary directory.
+// By default, all vlog statements write to files in a temporary directory.
 // This package provides several flags that modify this behavior.
 // As a result, flag.Parse must be called before any logging is done.
 //
@@ -48,10 +48,10 @@
 //		When set to a file and line number holding a logging statement,
 //		such as
 //			-log_backtrace_at=gopherflakes.go:234
-//		a stack trace will be written to the Info log whenever execution
+//		a stack trace will be written to the Info vlog whenever execution
 //		hits that statement. (Unlike with -vmodule, the ".go" must be
 //		present.)
-package glog
+package lib
 
 import (
 	"bytes"
@@ -93,13 +93,13 @@ func NewLogger() *LoggingT {
 	return l
 }
 
-// ToStderr set logging log to stderr
+// ToStderr set logging vlog to stderr
 func (l *LoggingT) ToStderr(enable bool) *LoggingT {
 	l.toStderr = enable
 	return l
 }
 
-// AlsoToStderr set logging log to stderr in addtional
+// AlsoToStderr set logging vlog to stderr in addtional
 func (l *LoggingT) AlsoToStderr(enable bool) *LoggingT {
 	l.alsoToStderr = enable
 	return l
@@ -138,7 +138,7 @@ func (l *LoggingT) EnableLogHeader(enable bool) *LoggingT {
 	return l
 }
 
-// EnableLogLink add symlink to the newest log
+// EnableLogLink add symlink to the newest vlog
 func (l *LoggingT) EnableLogLink(enable bool) *LoggingT {
 	l.enableLogLink = enable
 	return l
@@ -150,7 +150,7 @@ func (l *LoggingT) HeaderFormat(f HeaderFormatFunc) *LoggingT {
 	return l
 }
 
-// StdHeader set the header format as same as LstdFlags in Package `log`
+// StdHeader set the header format as same as LstdFlags in Package `vlog`
 func (l *LoggingT) StdHeader() *LoggingT {
 
 	l.headerFormater = func(buf *bytes.Buffer, _ Severity, ts time.Time, _ int, file string, line int) {
@@ -169,10 +169,10 @@ func (l *LoggingT) FlushInterval(interval time.Duration) *LoggingT {
 	return l
 }
 
-// FileNameFormatFunc tell logger how to format log file name
+// FileNameFormatFunc tell logger how to format vlog file name
 type FileNameFormatFunc func(severityLevel string, ts time.Time) string
 
-// FileNameFormat set log file name formater
+// FileNameFormat set vlog file name formater
 func (l *LoggingT) FileNameFormat(formatFunc FileNameFormatFunc) *LoggingT {
 	l.fileNameFormatFunc = formatFunc
 	return l
@@ -187,7 +187,7 @@ func (l *LoggingT) Init() *Logger {
 	return &Logger{l}
 }
 
-// Flush flushes all pending log I/O.
+// Flush flushes all pending vlog I/O.
 func Flush() {
 	logging.lockAndFlushAll()
 }
@@ -196,7 +196,7 @@ func (l *LoggingT) flush() {
 	l.lockAndFlushAll()
 }
 
-// Flush flushes all pending log I/O.
+// Flush flushes all pending vlog I/O.
 func (l *Logger) Flush() {
 	l.l.lockAndFlushAll()
 }
@@ -222,7 +222,7 @@ type LoggingT struct {
 	// mu protects the remaining elements of this structure and is
 	// used to synchronize logging.
 	mu sync.Mutex
-	// file holds writer for each of the log types.
+	// file holds writer for each of the vlog types.
 	file [numSeverity]flushSyncWriter
 
 	// traceLocation is the state of the -log_backtrace_at flag.
@@ -235,7 +235,7 @@ type LoggingT struct {
 
 	// If non-empty, overrides the choice of directory in which to write logs.
 	// See createLogDirs for the full list of possible destinations.
-	// var logDir = flag.String("log_dir", "", "If non-empty, write log files in this directory")
+	// var logDir = flag.String("log_dir", "", "If non-empty, write vlog files in this directory")
 	logDir     string
 	onceLogDir sync.Once
 
@@ -247,7 +247,7 @@ type LoggingT struct {
 	fatalNoStacks uint32
 
 	enableLogHeader bool
-	enableLogLink   bool // symlink to the newest log with level-tag
+	enableLogLink   bool // symlink to the newest vlog with level-tag
 
 	flushInterval time.Duration
 }
@@ -292,14 +292,14 @@ func (l *LoggingT) putBuffer(b *buffer) {
 var timeNow = time.Now // Stubbed out for testing.
 
 /*
-header formats a log header as defined by the C++ implementation.
+header formats a vlog header as defined by the C++ implementation.
 It returns a buffer containing the formatted header and the user's file and line number.
-The depth specifies how many stack frames above lives the source line to be identified in the log message.
+The depth specifies how many stack frames above lives the source line to be identified in the vlog message.
 
 Log lines have this form:
 	Lmmdd hh:mm:ss.uuuuuu threadid file:line] msg...
 where the fields are defined as follows:
-	L                A single character, representing the log level (eg 'I' for INFO)
+	L                A single character, representing the vlog level (eg 'I' for INFO)
 	mm               The month (zero padded; ie May is '05')
 	dd               The day (zero padded)
 	hh:mm:ss.uuuuuu  Time in hours, minutes and fractional seconds
@@ -325,7 +325,7 @@ func (l *LoggingT) header(s Severity, depth int) (*buffer, string, int) {
 // HeaderFormatFunc define the callback to made up custom header
 type HeaderFormatFunc func(buf *bytes.Buffer, l Severity, ts time.Time, pid int, file string, line int)
 
-// formatHeader formats a log header using the provided file name and line number.
+// formatHeader formats a vlog header using the provided file name and line number.
 func (l *LoggingT) formatHeader(s Severity, file string, line int) *buffer {
 	buf := l.getBuffer()
 	if !l.enableLogHeader {
@@ -406,8 +406,8 @@ func (l *LoggingT) printf(s Severity, format string, args ...interface{}) {
 }
 
 // printWithFileLine behaves like print but uses the provided file and line number.  If
-// alsoLogToStderr is true, the log message always appears on standard error; it
-// will also appear in the log file unless --logtostderr is set.
+// alsoLogToStderr is true, the vlog message always appears on standard error; it
+// will also appear in the vlog file unless --logtostderr is set.
 func (l *LoggingT) printWithFileLine(s Severity, file string, line int, alsoToStderr bool, args ...interface{}) {
 	buf := l.formatHeader(s, file, line)
 	fmt.Fprint(buf, args...)
@@ -417,7 +417,7 @@ func (l *LoggingT) printWithFileLine(s Severity, file string, line int, alsoToSt
 	l.output(s, buf, file, line, alsoToStderr)
 }
 
-// output writes the data to the log files and releases the buffer.
+// output writes the data to the vlog files and releases the buffer.
 func (l *LoggingT) output(s Severity, buf *buffer, file string, line int, alsoToStderr bool) {
 
 	if s < l.sevThreshold.get() {
@@ -496,7 +496,7 @@ func (l *LoggingT) output(s Severity, buf *buffer, file string, line int, alsoTo
 
 // timeoutFlush calls Flush and returns when it completes or after timeout
 // elapses, whichever happens first.  This is needed because the hooks invoked
-// by Flush may deadlock when glog.Fatal is called from a hook that holds
+// by Flush may deadlock when lib.Fatal is called from a hook that holds
 // a lock.
 func (l *LoggingT) timeoutFlush(timeout time.Duration) {
 	done := make(chan bool, 1)
@@ -507,7 +507,7 @@ func (l *LoggingT) timeoutFlush(timeout time.Duration) {
 	select {
 	case <-done:
 	case <-time.After(timeout):
-		fmt.Fprintln(os.Stderr, "glog: Flush took longer than", timeout)
+		fmt.Fprintln(os.Stderr, "lib: Flush took longer than", timeout)
 	}
 }
 
@@ -535,14 +535,14 @@ func stacks(all bool) []byte {
 // for fatal logs. Instead, exit could be a function rather than a method but that
 // would make its use clumsier.
 var logExitFunc func(error) = func(err error) {
-	fmt.Fprintf(os.Stderr, "glog: fatal error: %v", err)
+	fmt.Fprintf(os.Stderr, "lib: fatal error: %v", err)
 }
 
-// exit is called if there is trouble creating or writing log files.
+// exit is called if there is trouble creating or writing vlog files.
 // It flushes the logs and exits the program; there's no point in hanging around.
 // l.mu is held.
 func (l *LoggingT) exit(err error) {
-	fmt.Fprintf(os.Stderr, "log: exiting because of error: %s\n", err)
+	fmt.Fprintf(os.Stderr, "vlog: exiting because of error: %s\n", err)
 	// If logExitFunc is set, we do that instead of exiting.
 	if logExitFunc != nil {
 		logExitFunc(err)
@@ -552,7 +552,7 @@ func (l *LoggingT) exit(err error) {
 	// os.Exit(2)
 }
 
-// createFiles creates all the log files for severity from sev down to infoLog.
+// createFiles creates all the vlog files for severity from sev down to infoLog.
 // l.mu is held.
 func (l *LoggingT) createFiles(sev Severity) error {
 	now := time.Now()
@@ -573,7 +573,7 @@ func (l *LoggingT) createFiles(sev Severity) error {
 
 const defaultFlushInterval = 3 * time.Second
 
-// flushDaemon periodically flushes the log file buffers.
+// flushDaemon periodically flushes the vlog file buffers.
 func (l *LoggingT) flushDaemon() {
 	for _ = range time.NewTicker(l.flushInterval).C {
 		l.lockAndFlushAll()
@@ -605,9 +605,9 @@ func (l *LoggingT) flushAll() {
 
 }
 
-// CopyStandardLogTo arranges for messages written to the Go "log" package's
+// CopyStandardLogTo arranges for messages written to the Go "vlog" package's
 // default logs to also appear in the Google logs for the named and lower
-// severities.  Subsequent changes to the standard log's default output location
+// severities.  Subsequent changes to the standard vlog's default output location
 // or format may break this behavior.
 //
 // Valid names are "INFO", "WARNING", "ERROR", and "FATAL".  If the name is not
@@ -615,9 +615,9 @@ func (l *LoggingT) flushAll() {
 func CopyStandardLogTo(name string) {
 	sev, ok := severityByName(name)
 	if !ok {
-		panic(fmt.Sprintf("log.CopyStandardLogTo(%q): unrecognized severity name", name))
+		panic(fmt.Sprintf("vlog.CopyStandardLogTo(%q): unrecognized severity name", name))
 	}
-	// Set a log format that captures the user's file and line:
+	// Set a vlog format that captures the user's file and line:
 	//   d.go:23: message
 	stdLog.SetFlags(stdLog.Lshortfile)
 	stdLog.SetOutput(logBridge(sev))
@@ -637,7 +637,7 @@ func (lb logBridge) Write(b []byte) (n int, err error) {
 	)
 	// Split "d.go:23: message" into "d.go", "23", and "message".
 	if parts := bytes.SplitN(b, []byte{':'}, 3); len(parts) != 3 || len(parts[0]) < 1 || len(parts[2]) < 1 {
-		text = fmt.Sprintf("bad log format: %s", b)
+		text = fmt.Sprintf("bad vlog format: %s", b)
 	} else {
 		file = string(parts[0])
 		text = string(parts[2][1:]) // skip leading space
@@ -647,103 +647,103 @@ func (lb logBridge) Write(b []byte) (n int, err error) {
 			line = 1
 		}
 	}
-	// printWithFileLine with alsoToStderr=true, so standard log messages
+	// printWithFileLine with alsoToStderr=true, so standard vlog messages
 	// always appear on standard error.
 	logging.printWithFileLine(Severity(lb), file, line, true, text)
 	return len(b), nil
 }
 
-// Debug logs to the DEBUG log.
+// Debug logs to the DEBUG vlog.
 // Arguments are handled in the manner of fmt.Print; a newline is appended if missing.
 func Debug(args ...interface{}) {
 	logging.print(debugLog, args...)
 }
 
-// Debug logs to the DEBUG log.
+// Debug logs to the DEBUG vlog.
 // Arguments are handled in the manner of fmt.Print; a newline is appended if missing.
 func (l *Logger) Debug(args ...interface{}) {
 	l.l.print(debugLog, args...)
 }
 
-// DebugDepth acts as Debug but uses depth to determine which call frame to log.
+// DebugDepth acts as Debug but uses depth to determine which call frame to vlog.
 // DebugDepth(0, "msg") is the same as Debug("msg").
 func DebugDepth(depth int, args ...interface{}) {
 	logging.printDepth(debugLog, depth, args...)
 }
 
-// DebugDepth acts as Debug but uses depth to determine which call frame to log.
+// DebugDepth acts as Debug but uses depth to determine which call frame to vlog.
 // DebugDepth(0, "msg") is the same as Debug("msg").
 func (l *Logger) DebugDepth(depth int, args ...interface{}) {
 	l.l.printDepth(debugLog, depth, args...)
 }
 
-// Debugln logs to the DEBUG log.
+// Debugln logs to the DEBUG vlog.
 // Arguments are handled in the manner of fmt.Println; a newline is appended if missing.
 func Debugln(args ...interface{}) {
 	logging.println(debugLog, args...)
 }
 
-// Debugln logs to the DEBUG log.
+// Debugln logs to the DEBUG vlog.
 // Arguments are handled in the manner of fmt.Println; a newline is appended if missing.
 func (l *Logger) Debugln(args ...interface{}) {
 	l.l.println(debugLog, args...)
 }
 
-// Debugf logs to the DEBUG log.
+// Debugf logs to the DEBUG vlog.
 // Arguments are handled in the manner of fmt.Printf; a newline is appended if missing.
 func Debugf(format string, args ...interface{}) {
 	logging.printf(debugLog, format, args...)
 }
 
-// Debugf logs to the DEBUG log.
+// Debugf logs to the DEBUG vlog.
 // Arguments are handled in the manner of fmt.Printf; a newline is appended if missing.
 func (l *Logger) Debugf(format string, args ...interface{}) {
 	l.l.printf(debugLog, format, args...)
 }
 
-// Info logs to the INFO log.
+// Info logs to the INFO vlog.
 // Arguments are handled in the manner of fmt.Print; a newline is appended if missing.
 func Info(args ...interface{}) {
 	logging.print(infoLog, args...)
 }
 
-// Info logs to the INFO log.
+// Info logs to the INFO vlog.
 // Arguments are handled in the manner of fmt.Print; a newline is appended if missing.
 func (l *Logger) Info(args ...interface{}) {
 	l.l.print(infoLog, args...)
 }
 
-// InfoDepth acts as Info but uses depth to determine which call frame to log.
+// InfoDepth acts as Info but uses depth to determine which call frame to vlog.
 // InfoDepth(0, "msg") is the same as Info("msg").
 func InfoDepth(depth int, args ...interface{}) {
 	logging.printDepth(infoLog, depth, args...)
 }
 
-// InfoDepth acts as Info but uses depth to determine which call frame to log.
+// InfoDepth acts as Info but uses depth to determine which call frame to vlog.
 // InfoDepth(0, "msg") is the same as Info("msg").
 func (l *Logger) InfoDepth(depth int, args ...interface{}) {
 	l.l.printDepth(infoLog, depth, args...)
 }
 
-// Infoln logs to the INFO log.
+// Infoln logs to the INFO vlog.
 // Arguments are handled in the manner of fmt.Println; a newline is appended if missing.
 func Infoln(args ...interface{}) {
 	logging.println(infoLog, args...)
 }
 
-// Infoln logs to the INFO log.
+// Infoln logs to the INFO vlog.
 // Arguments are handled in the manner of fmt.Println; a newline is appended if missing.
 func (l *Logger) Infoln(args ...interface{}) {
 	l.l.println(infoLog, args...)
 }
 
-// Infof logs to the INFO log.
+// Infof logs to the INFO vlog.
 // Arguments are handled in the manner of fmt.Printf; a newline is appended if missing.
 func Infof(format string, args ...interface{}) {
 	logging.printf(infoLog, format, args...)
 }
 
-// Infof logs to the INFO log.
+// Infof logs to the INFO vlog.
 // Arguments are handled in the manner of fmt.Printf; a newline is appended if missing.
 func (l *Logger) Infof(format string, args ...interface{}) {
 	l.l.printf(infoLog, format, args...)
@@ -761,13 +761,13 @@ func (l *Logger) Warning(args ...interface{}) {
 	l.l.print(warningLog, args...)
 }
 
-// WarningDepth acts as Warning but uses depth to determine which call frame to log.
+// WarningDepth acts as Warning but uses depth to determine which call frame to vlog.
 // WarningDepth(0, "msg") is the same as Warning("msg").
 func WarningDepth(depth int, args ...interface{}) {
 	logging.printDepth(warningLog, depth, args...)
 }
 
-// WarningDepth acts as Warning but uses depth to determine which call frame to log.
+// WarningDepth acts as Warning but uses depth to determine which call frame to vlog.
 // WarningDepth(0, "msg") is the same as Warning("msg").
 func (l *Logger) WarningDepth(depth int, args ...interface{}) {
 	l.l.printDepth(warningLog, depth, args...)
@@ -809,13 +809,13 @@ func (l *Logger) Error(args ...interface{}) {
 	l.l.print(errorLog, args...)
 }
 
-// ErrorDepth acts as Error but uses depth to determine which call frame to log.
+// ErrorDepth acts as Error but uses depth to determine which call frame to vlog.
 // ErrorDepth(0, "msg") is the same as Error("msg").
 func ErrorDepth(depth int, args ...interface{}) {
 	logging.printDepth(errorLog, depth, args...)
 }
 
-// ErrorDepth acts as Error but uses depth to determine which call frame to log.
+// ErrorDepth acts as Error but uses depth to determine which call frame to vlog.
 // ErrorDepth(0, "msg") is the same as Error("msg").
 func (l *Logger) ErrorDepth(depth int, args ...interface{}) {
 	l.l.printDepth(errorLog, depth, args...)
@@ -859,13 +859,13 @@ func (l *Logger) Fatal(args ...interface{}) {
 	l.l.print(fatalLog, args...)
 }
 
-// FatalDepth acts as Fatal but uses depth to determine which call frame to log.
+// FatalDepth acts as Fatal but uses depth to determine which call frame to vlog.
 // FatalDepth(0, "msg") is the same as Fatal("msg").
 func FatalDepth(depth int, args ...interface{}) {
 	logging.printDepth(fatalLog, depth, args...)
 }
 
-// FatalDepth acts as Fatal but uses depth to determine which call frame to log.
+// FatalDepth acts as Fatal but uses depth to determine which call frame to vlog.
 // FatalDepth(0, "msg") is the same as Fatal("msg").
 func (l *Logger) FatalDepth(depth int, args ...interface{}) {
 	l.l.printDepth(fatalLog, depth, args...)
@@ -913,14 +913,14 @@ func (l *Logger) Exit(args ...interface{}) {
 	l.l.print(fatalLog, args...)
 }
 
-// ExitDepth acts as Exit but uses depth to determine which call frame to log.
+// ExitDepth acts as Exit but uses depth to determine which call frame to vlog.
 // ExitDepth(0, "msg") is the same as Exit("msg").
 func ExitDepth(depth int, args ...interface{}) {
 	atomic.StoreUint32(&logging.fatalNoStacks, 1)
 	logging.printDepth(fatalLog, depth, args...)
 }
 
-// ExitDepth acts as Exit but uses depth to determine which call frame to log.
+// ExitDepth acts as Exit but uses depth to determine which call frame to vlog.
 // ExitDepth(0, "msg") is the same as Exit("msg").
 func (l *Logger) ExitDepth(depth int, args ...interface{}) {
 	atomic.StoreUint32(&l.l.fatalNoStacks, 1)
@@ -954,7 +954,7 @@ func (l *Logger) Exitf(format string, args ...interface{}) {
 }
 
 //===========
-// AccessDepth acts as Acess but uses depth to determine which call frame to log.
+// AccessDepth acts as Acess but uses depth to determine which call frame to vlog.
 // AccessDepth(0, "msg") is the same as Acess("msg").
 func (l *Logger) AccessDepth(depth int, args ...interface{}) {
 	l.l.printDepth(accessLog, depth, args...)
